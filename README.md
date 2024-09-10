@@ -5,4 +5,4 @@
 
 # Youtube review
 
-[DP의 아름다움] (https://www.youtube.com/watch?v=WCy_hKI0yZ4&t=1858s)
+[DP의 아름다움](https://github.com/sunlike0508/book-review/blob/main/DP%EC%9D%98%EC%95%84%EB%A6%84%EB%8B%A4%EC%9B%80.md)
