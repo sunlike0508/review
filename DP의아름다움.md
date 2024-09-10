@@ -68,7 +68,22 @@
 
 내적동질성 : 생성형이 언제나 연산을 실행함
 
-```
+```java
+class Parent {
+  void print() {
+    System.out.println("panent");
+  }
+}
+
+class Child extend Parent {
+  @Overrride
+  void print() {
+    System.out.println("panent");
+  }
+}
+
+Parent whoAmI = new Child();
+whoAmI.print();
 ```
 
 
