@@ -6,3 +6,4 @@
 # Youtube review
 
 [DP의 아름다움](https://github.com/sunlike0508/book-review/blob/main/DP%EC%9D%98%EC%95%84%EB%A6%84%EB%8B%A4%EC%9B%80.md)
+[DP의 아름다움2](https://github.com/sunlike0508/book-review/blob/main/DP%EC%9D%98%EC%95%84%EB%A6%84%EB%8B%A4%EC%9B%802.md)
