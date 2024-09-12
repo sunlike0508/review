@@ -134,19 +134,136 @@ class AC: A, C
 
 ## 상향식 하향식
 
+1. 추상클래스가 상향식일까?
+   * 구상 클래스의 교집합을 묶을 때 인터페이스로 묶을 수도 있음
+   * 구현시 상태가 개입하는 경우도 외부 전략객체를 가져오면 됨
+   * 상태를 추상층과 구상층이 공유하면 프로시져 지향 프로그래밍
+  
+2. 그렇다면 추상클래스(타입계층구조)의 의미와 가치는?
+   * 왜 계층을 두는가?
+   * 인지적인 카테고리를 제공함 ex) Number 아래, integer, long을 두는 것. Integer, Long에 interface로 계산한다는 기능만 제공해도 되는데 추상클래스로 Number를 두는 건?
+   * 인터페이스는 어떤 타입도 구상할 수 있는데 비해 추상클래스의 기능은 오직 해당 타입계층에게만 제공되게 제약됨.
+   * 즉, 인터페이스는 누구나 가져다 쓸수 있다. 하지만 추상은 내가 허락한 자식만 나의 기능을 가져다 쓸수있다.
+   * 타입계층은 결국 내가 허락한 클래스에게만 나의 기능을 허락한다.
+   * 물론 요즘 인터페이스에도 default를 지원하긴 하지만
+   * 결국 기능의 묶음은 인터페이스나 추상클래스 동일하게 제공할 수 있지만 사용할 수 있는 타입을 제약할 것인가 아닌가에 달려있음
+  
+***기능이 일반화될 수 있는 것인가, 아니면 특정 타입계층에서만 의미있는가***
+
+물론 둘다 있을 수 있다.
+
+맹님 주장 : 예를 들어 tosring, hashcode 이런거는 사실 어느 곳이든 사용가능하기 때문에 인터페이스로 나오는게 맞다고 생각한다. 왜 일반적이니까. 
+
+자바진영에서는 모든 객체에 object를 상속받게 구현되어 있어서 tostring 기능을 강제 제공하고 싶기에 지금 그렇게 되어 있지만.
+
+옆으로 커지든 아래로 깊어지든 컨텍스트를 하나만 가지고 있느냐가 중요. (단일 책임의 원칙)
+
+단일 책임의 원칙을 지키면 커지든 내려가든 컨텍스트를 하나만 가지고 있다면 조합폭발이 일어나지 않는다.
+
+예를 들어 운송이라는 컨텍스트를 유지하면, 사람운송, 자동차 운송, 오토바이운송 이렇게 가로로 퍼질수 있고 또 사람운송도 도보운송, 자전거 운송 이렇게 아래로 내려간다.
+
+근데 여기서 옆에 결제 이런게 붙으면 이제 조합폭발이 일어남
+
+타입의 개수가 많은건 그만큼 도메인이 많다는 것. if가 곧 도메인 . 남자냐 여자냐 나눠야 하니까 남자도 도메인, 여자도 도메인.
+
+타입이 많은건 당연한거. 도메인이 그렇게 많은거니까. 단지 타입 계층 카테고리를 만들때 컨텍스트를 여러개 가지고 있는 계층을 만들지 않도록 노력해야한다.
+
+운송 패키지에 갑자기 주유급유라는 컨텍스트를 슬며시 넣음. 운송이니까 주유급유가 왠지 들어가야 할것 같은데? 아니다라는 것.
+
+## 위임객체와 본객체의 가시성
+
+1. 위임객체와 본객체의 내부 가시성을 전혀 접근할 수 없는 경우
+   * 본객체의 인터페이스로 위임객체를 지정할 이유가 없음
+   * 본객체의 인터페이스 구현이 위임객체와 본객체의 상태를 섞어서 구현하는 경우 굳이 위임객체가 해당 인터페이스가 될 이유가 없음.
+     (어차피 개별 구상 클래스마다 따로 구현해야 하니까)     
+
+2. 위임객체가 본 객체의 public 미만의 가시성에 접근가능한 경우
+   * 위임 객체를 위해 본객체가 public으로 승격하면 캡슐화 붕괴
+   * 내부클래스 등 언어 특수 기능을 쓰게 되는 경우 특정 쿠상클래스에 바인딩되어 일반화된 위임객체를 얻을 수 없음. 
+
+```kotlin
+interface A {
+  fun a()
+}
+class Test:A {
+   private val delegate = ConcreateA()
+
+   override fun a() = delegate.a()
+}
+
+// 1번째 상황
 
 
+class Test:A {
+   private val delegate = ConcreateA()
+   private var b;
+   private fun c(){}
+
+   override fun a() {
+      b = delegate.a()
+      c()
+   }
+}
+
+// 2번재 상황
+```
+위의 상황이 생기면 왜 위임객체를 만듦?
+
+뭔가 본능적으로 합성, 위임 패턴 안쓸꺼야. 딱 봐도 이상하잖아.
+
+***위임객체가 성립하려면 위임객체와 본객체 간에 추가적인 교환 인터페이스가 정의되어야 함. 단 이 경우에도 이러한 교환 인터페이스가 공개되는 단점***
+
+결국 위임객체가 의미가 있으려면 본객체랑 통신해야함. 근데 내장을 까지 않으려면 결국 서로 통신하기 위한 중간 인터페이스(or 추상클래스)가 필요함
+
+```java
+interface Next<T> {
+    <T> int next(T t);
+}
+
+class ItemIncreaseNext<T> implements Next<T> {
+
+    private Item<T> item;
+    private int cursor = 0;
+
+    ItemIncreaseNext(Item<T> item) {
+        this.item = item;
+    }
+
+    @Override
+    public <T> int next(T t) {
+        return item.get(cursor);
+    }
+}
+
+abstract class Item<T> {
+    abstract <T> int get(int key);
+}
+
+class IntItem extends Item<Integer> implements Next<Item<Integer>> {
+
+    private ItemIncreaseNext<Integer> delegator = new ItemIncreaseNext<>(this);
+
+    @Override
+    <T> int get(int key) {
+        return 3;
+    }
 
 
+    @Override
+    public <T> int next(T t) {
+        return delegator.next(t);
+    }
+}
+```
 
+``` java
+abstract class Item<T> {
+    abstract <T> int get(int key);
+}
 
-
-
-
-
-
-
-
-
-
+interface Item<T> {
+  <T> int get(int key);
+}
+```
+위에는 아래처럼 변경 가능하나 오픈되어지기 때문에 위험
 
