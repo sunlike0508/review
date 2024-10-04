@@ -13,4 +13,4 @@
 
 ## Programming 101
 
-[1회차[()
+[1회차](https://github.com/sunlike0508/review/blob/main/Programming101_1)
