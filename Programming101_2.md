@@ -218,33 +218,88 @@ public static int arrayAccumulator(int[] array, int sum, int index) {
 
 이 두가지 경우의 합집합을 정의할 수 있다.
 
-***자바스크립트로 하다보니 위에 내용을 좀 더 이해하기 위해 아래 코드를 자바스크립트로***
+***자바스크립트로 하다보니 자바로 내가 만들기 너무 언어적 차이가 커서 자바스크립트로 교체***
+
+최종적으로 아래와 같이 valiator하는 역할과 덧셈 영역으로 분리 할 수 있다.
 
 ```javascript
-const validator = [
-    (list, el) => Array.isArray(list),
-    (list, el) => typeof el == 'number'
-]
+const validator = {
+    data:[
+        (list, el) => Array.isArray(list),
+        (list, el) => typeof el == 'number'
+    ],
+    validate(list, index) {
+        return this.data.every(vali => vali(list, list[index]))
+    }
+};
 
 const recursive = (list, index = 0, acc = 0) => {
-    if(!validator.every(vali => vali(list, list[index]))) throw ''
-
+    if(!validator.validate(list, list[index])) throw `invalid argument, list ${list}, element ${list[index]}`;
     return recursive(list, index , acc + list[index]);
 }
 ```
 
+## 변수의 스코프
+
+변수의 라이프 사이클과 스코프는 다르다. 스코프를 유지하지만 라이프 사이클은 길게도 혹은 짧게도 가져갈 수 있다.
+
+길게 가져간다면 메모리 효율성은 나빠진다. 대신 연산을 줄일 수 있다. 반대로 연산이 많아지면 메모리 효율성은 좋아진다.
 
 
+```javsscript
+const arraySum = (() => {
+    const elementSum = (arr, i, acc) => {
+        if(arr.length === i) return acc;
+        return elementSum(arr, acc + arr[i], i + 1);
+    };
 
+    return arr => elementSum(arr, 0, 0);
+})
+```
 
+이렇게 쓰면 내가 i와 acc에 대해서 제약조건을 스스로 안에 넣었기 때문에 클라이언트에서 신경쓸 필요가 없다.
 
+추가로 elementSum이라는 익명함수를 통해 우리가 배우는 쪼개서 생각하는 테일 리커시브를 표현할 수 있다.
 
+그러면 이런 스코프를 쓰면 좋은 점은? 바로 변수의 권한.
 
+위에서는 i와 acc의 사용 권한을 arraySum에서만 0, 0으로 강제 저장하여 사용하고 있다.
 
+즉, 실제 사용하는 클라이언트에서는 arraySum에는 list만 보낼 뿐, i와 acc가 있는지도 모른다.
 
+따라서 i와 acc를 클라이언트가 조작 할수 없게(알수 없게) 함으로써 arraySum만 사용 가능하도록 권한을 지정할 수 있다.
 
+우리가 코드를 설계할떄 생각해야하는 첫번째 이유다.
 
+우리가 코드를 짜기 어려운 이유중 하나이다. 
 
+```javascript
+const arraySum = (() => {
+    const elementSum = (arr, i, acc) => {
+        if(arr.length === i) return acc;
+        return elementSum(arr, acc + arr[i], i + 1);
+    };
+
+    return elementSum(arr, 0, 0);
+    // scope는 arraySum만 알게, lifecycle은 arraysum 호출할 때 생성되어 리턴시 제거
+})();
+
+const arraySum = (() => {
+    const elementSum = (arr, i, acc) => {
+        if(arr.length === i) return acc;
+        return elementSum(arr, acc + arr[i], i + 1);
+    };
+    
+    const arraySum = elementSum(arr, 0, 0);
+    
+    return arraySum;
+    // scope는 arraySum만 알게, lifecycle은 영구적
+})();
+```
+
+* 아마도 const가 static이랑 같은 역할인듯. 그래서 elementSum이라는 함수가 영구적으로 메모리에 남는다는 얘기.
+
+내가 메모리의 상태에 따라 위 아래 잘 선택.
 
 
 
